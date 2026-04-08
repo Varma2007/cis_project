@@ -2,24 +2,26 @@
 <html>
 <head>
   <title>Cloud App Catalog</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: Arial; text-align: center; }
+    input, button { margin: 5px; padding: 8px; }
+  </style>
 </head>
 <body>
 
-<h1>☁️ Cloud Application Catalog</h1>
+<h1>☁️ Cloud App Catalog</h1>
 
-<div class="form">
-  <input id="name" placeholder="App Name">
-  <input id="category" placeholder="Category">
-  <input id="version" placeholder="Version">
-  <button onclick="addApp()">Add App</button>
-</div>
+<input id="name" placeholder="App Name">
+<input id="category" placeholder="Category">
+<input id="version" placeholder="Version">
 
-<h2>Applications</h2>
+<button onclick="addApp()">Add App</button>
+
+<h2>Apps</h2>
 <ul id="list"></ul>
 
 <script>
-const API = "https://YOUR-BACKEND-URL.onrender.com";
+const API = "https://cloud-backend-ht80.onrender.com"; // 🔥 YOUR BACKEND URL
 
 async function loadApps() {
   const res = await fetch(API + "/apps");
@@ -33,7 +35,7 @@ async function loadApps() {
 
     li.innerHTML = `
       <b>${app.name}</b> (${app.category}) - v${app.version}
-      <button onclick="useApp('${app._id}', '${app.category}')">Use</button>
+      <button onclick="useApp('${app._id}')">Use</button>
       <button onclick="deleteApp('${app._id}')">Delete</button>
     `;
 
@@ -56,17 +58,21 @@ async function addApp() {
 }
 
 async function deleteApp(id) {
-  await fetch(API + "/apps/" + id, { method: "DELETE" });
+  await fetch(API + "/apps/" + id, {
+    method: "DELETE"
+  });
+
   loadApps();
 }
 
-async function useApp(id, category) {
-  await fetch(API + "/use/" + id, { method: "PUT" });
+async function useApp(id) {
+  const res = await fetch(API + "/use/" + id, {
+    method: "PUT"
+  });
 
-  const res = await fetch(API + "/recommend/" + category);
-  const rec = await res.json();
+  const data = await res.json();
 
-  alert("Recommended apps: " + rec.map(a => a.name).join(", "));
+  alert("Recommended: " + data.map(a => a.name).join(", "));
 }
 
 loadApps();

@@ -6,53 +6,79 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 🔴 Replace with your MongoDB Atlas URL
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("DB Connected"))
-  .catch(err => console.log(err));
+const PORT = process.env.PORT || 5000;
 
+// ✅ MongoDB Connection (SAFE)
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ DB Connected"))
+  .catch(err => console.log("❌ DB Error:", err));
+
+// ✅ Schema
 const AppSchema = new mongoose.Schema({
   name: String,
   category: String,
   version: String,
-  dependencies: [String],
   usage_count: { type: Number, default: 0 }
 });
 
 const AppModel = mongoose.model("App", AppSchema);
 
-// CREATE
-app.post("/apps", async (req, res) => {
-  const appData = new AppModel(req.body);
-  await appData.save();
-  res.json(appData);
+// ✅ Root Route (IMPORTANT)
+app.get("/", (req, res) => {
+  res.send("🚀 API Running");
 });
 
-// READ
+// ✅ Get Apps
 app.get("/apps", async (req, res) => {
-  const apps = await AppModel.find();
-  res.json(apps);
+  try {
+    const apps = await AppModel.find();
+    res.json(apps);
+  } catch (err) {
+    res.status(500).send("Error fetching apps");
+  }
 });
 
-// DELETE
+// ✅ Add App
+app.post("/apps", async (req, res) => {
+  try {
+    const newApp = new AppModel(req.body);
+    await newApp.save();
+    res.json(newApp);
+  } catch (err) {
+    res.status(500).send("Error saving app");
+  }
+});
+
+// ✅ Delete App
 app.delete("/apps/:id", async (req, res) => {
-  await AppModel.findByIdAndDelete(req.params.id);
-  res.json({ message: "Deleted" });
+  try {
+    await AppModel.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    res.status(500).send("Error deleting app");
+  }
 });
 
-// RECOMMENDATION
-app.get("/recommend/:category", async (req, res) => {
-  const apps = await AppModel.find({ category: req.params.category });
-  res.json(apps);
-});
-
-// INCREASE USAGE
+// ✅ Increase Usage + Recommend
 app.put("/use/:id", async (req, res) => {
-  await AppModel.findByIdAndUpdate(req.params.id, {
-    $inc: { usage_count: 1 }
-  });
-  res.json({ message: "Updated usage" });
+  try {
+    const appData = await AppModel.findById(req.params.id);
+
+    await AppModel.findByIdAndUpdate(req.params.id, {
+      $inc: { usage_count: 1 }
+    });
+
+    const recommendations = await AppModel.find({
+      category: appData.category
+    });
+
+    res.json(recommendations);
+  } catch (err) {
+    res.status(500).send("Error updating usage");
+  }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log("Server running on port " + PORT));
+// ✅ Start Server
+app.listen(PORT, () => {
+  console.log("🚀 Server running on port " + PORT);
+});
