@@ -9,7 +9,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 5000;
 
 // ✅ MongoDB Connection (SAFE)
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect("mongodb+srv://varma:Varma%40272@cluster0.vfhzinu.mongodb.net/mydb")
   .then(() => console.log("✅ DB Connected"))
   .catch(err => console.log("❌ DB Error:", err));
 
