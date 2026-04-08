@@ -8,7 +8,7 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-// ✅ MongoDB Connection (SAFE)
+// ✅ MongoDB Connection (hardcoded for reliability)
 mongoose.connect("mongodb+srv://varma:Varma%40272@cluster0.vfhzinu.mongodb.net/mydb")
   .then(() => console.log("✅ DB Connected"))
   .catch(err => console.log("❌ DB Error:", err));
@@ -23,12 +23,15 @@ const AppSchema = new mongoose.Schema({
 
 const AppModel = mongoose.model("App", AppSchema);
 
-// ✅ Root Route (IMPORTANT)
+
+// ================= ROUTES =================
+
+// ✅ ROOT ROUTE (VERY IMPORTANT)
 app.get("/", (req, res) => {
   res.send("🚀 API Running");
 });
 
-// ✅ Get Apps
+// ✅ GET ALL APPS
 app.get("/apps", async (req, res) => {
   try {
     const apps = await AppModel.find();
@@ -38,7 +41,7 @@ app.get("/apps", async (req, res) => {
   }
 });
 
-// ✅ Add App
+// ✅ ADD APP
 app.post("/apps", async (req, res) => {
   try {
     const newApp = new AppModel(req.body);
@@ -49,7 +52,7 @@ app.post("/apps", async (req, res) => {
   }
 });
 
-// ✅ Delete App
+// ✅ DELETE APP
 app.delete("/apps/:id", async (req, res) => {
   try {
     await AppModel.findByIdAndDelete(req.params.id);
@@ -59,7 +62,7 @@ app.delete("/apps/:id", async (req, res) => {
   }
 });
 
-// ✅ Increase Usage + Recommend
+// ✅ USE APP + RECOMMENDATION
 app.put("/use/:id", async (req, res) => {
   try {
     const appData = await AppModel.findById(req.params.id);
@@ -78,7 +81,9 @@ app.put("/use/:id", async (req, res) => {
   }
 });
 
-// ✅ Start Server
+
+// ================= START SERVER =================
+
 app.listen(PORT, () => {
   console.log("🚀 Server running on port " + PORT);
 });
