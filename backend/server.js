@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 // 🔴 Replace with your MongoDB Atlas URL
-mongoose.connect("YOUR_MONGODB_URI")
+mongoose.connect("mongodb+srv://varma:Varma@272@cluster0.vfhzinu.mongodb.net/?appName=Cluster0")
   .then(() => console.log("DB Connected"))
   .catch(err => console.log(err));
 
