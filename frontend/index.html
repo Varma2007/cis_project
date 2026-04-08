@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cloud App Catalog</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>☁️ Cloud Application Catalog</h1>
+
+<div class="form">
+  <input id="name" placeholder="App Name">
+  <input id="category" placeholder="Category">
+  <input id="version" placeholder="Version">
+  <button onclick="addApp()">Add App</button>
+</div>
+
+<h2>Applications</h2>
+<ul id="list"></ul>
+
+<script>
+const API = "https://YOUR-BACKEND-URL.onrender.com";
+
+async function loadApps() {
+  const res = await fetch(API + "/apps");
+  const data = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  data.forEach(app => {
+    const li = document.createElement("li");
+
+    li.innerHTML = `
+      <b>${app.name}</b> (${app.category}) - v${app.version}
+      <button onclick="useApp('${app._id}', '${app.category}')">Use</button>
+      <button onclick="deleteApp('${app._id}')">Delete</button>
+    `;
+
+    list.appendChild(li);
+  });
+}
+
+async function addApp() {
+  const name = document.getElementById("name").value;
+  const category = document.getElementById("category").value;
+  const version = document.getElementById("version").value;
+
+  await fetch(API + "/apps", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, category, version })
+  });
+
+  loadApps();
+}
+
+async function deleteApp(id) {
+  await fetch(API + "/apps/" + id, { method: "DELETE" });
+  loadApps();
+}
+
+async function useApp(id, category) {
+  await fetch(API + "/use/" + id, { method: "PUT" });
+
+  const res = await fetch(API + "/recommend/" + category);
+  const rec = await res.json();
+
+  alert("Recommended apps: " + rec.map(a => a.name).join(", "));
+}
+
+loadApps();
+</script>
+
+</body>
+</html>
