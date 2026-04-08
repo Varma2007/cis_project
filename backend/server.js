@@ -1,4 +1,3 @@
-const PORT = process.env.PORT || 10000;
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -7,12 +6,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 
-// ✅ MongoDB Connection (hardcoded for reliability)
-mongoose.connect("mongodb+srv://varma:Varma%40272@cluster0.vfhzinu.mongodb.net/mydb")
-  .then(() => console.log("✅ DB Connected"))
-  .catch(err => console.log("❌ DB Error:", err));
+// 🔥 SAFE START (prevents crash)
+(async () => {
+  try {
+    await mongoose.connect("mongodb+srv://varma:Varma%40272@cluster0.vfhzinu.mongodb.net/mydb");
+    console.log("✅ DB Connected");
+  } catch (err) {
+    console.log("❌ DB Error:", err);
+  }
+})();
 
 // ✅ Schema
 const AppSchema = new mongoose.Schema({
@@ -24,15 +28,12 @@ const AppSchema = new mongoose.Schema({
 
 const AppModel = mongoose.model("App", AppSchema);
 
-
-// ================= ROUTES =================
-
-// ✅ ROOT ROUTE (VERY IMPORTANT)
+// ✅ ROOT ROUTE
 app.get("/", (req, res) => {
   res.send("🚀 API Running");
 });
 
-// ✅ GET ALL APPS
+// ✅ GET APPS
 app.get("/apps", async (req, res) => {
   try {
     const apps = await AppModel.find();
@@ -63,28 +64,7 @@ app.delete("/apps/:id", async (req, res) => {
   }
 });
 
-// ✅ USE APP + RECOMMENDATION
-app.put("/use/:id", async (req, res) => {
-  try {
-    const appData = await AppModel.findById(req.params.id);
-
-    await AppModel.findByIdAndUpdate(req.params.id, {
-      $inc: { usage_count: 1 }
-    });
-
-    const recommendations = await AppModel.find({
-      category: appData.category
-    });
-
-    res.json(recommendations);
-  } catch (err) {
-    res.status(500).send("Error updating usage");
-  }
-});
-
-
-// ================= START SERVER =================
-
+// ✅ START SERVER (IMPORTANT FIX)
 app.listen(PORT, "0.0.0.0", () => {
   console.log("🚀 Server running on port " + PORT);
 });
